@@ -1,9 +1,8 @@
 import telebot
 from telebot import types
 import json
-import os
 
-TOKEN = os.getenv("8438570344:AAGfzqB9GJ2j7Ix-N4Pcs6DAjcxotH91p1U")
+TOKEN = "8438570344:AAGfzqB9GJ2j7Ix-N4Pcs6DAjcxotH91p1U"
 
 CHANNEL_ID = "@INTERIOR_DESIGN_KRASNODAR"
 WEBAPP_URL = "https://karlitomasterini-dotcom.github.io/interior-mini-app/"
@@ -53,8 +52,10 @@ def handle_web_app(message):
             f"💬 Комментарий: {comment}"
         )
 
+        # Отправка в канал
         bot.send_message(CHANNEL_ID, text)
 
+        # Ответ пользователю
         bot.send_message(
             message.chat.id,
             "✅ Спасибо за заявку!\n\n"
@@ -76,3 +77,5 @@ def fallback(message):
 
 print("🤖 Бот запущен")
 bot.infinity_polling(timeout=20, long_polling_timeout=20)
+
+
