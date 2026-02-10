@@ -51,7 +51,7 @@ def handle_web_app(message):
 💬 Комментарий: {comment}
 """
 
-        bot.send_message(CHANNEL_ID, text)
+        bot.send_message(message.chat.id, text)
 
         bot.send_message(
             message.chat.id,
@@ -64,4 +64,5 @@ def handle_web_app(message):
 
 print("🤖 Бот запущен")
 bot.infinity_polling()
+
 
