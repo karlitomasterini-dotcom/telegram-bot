@@ -1,15 +1,22 @@
+import os
 import telebot
 from telebot import types
 import json
 
+# ========= ТОКЕН ИЗ RAILWAY VARIABLES =========
 TOKEN = os.getenv("BOT_TOKEN")
 
 CHANNEL_ID = "@INTERIOR_DESIGN_KRASNODAR"
 WEBAPP_URL = "https://karlitomasterini-dotcom.github.io/interior-mini-app/"
 
+# Проверка токена
+if not TOKEN:
+    print("❌ TOKEN НЕ НАЙДЕН! Проверь Variables в Railway")
+    exit()
+
 bot = telebot.TeleBot(TOKEN)
 
-# ---------- КНОПКА ----------
+# ========= КНОПКА =========
 def get_inline_keyboard():
     markup = types.InlineKeyboardMarkup()
     markup.add(
@@ -20,20 +27,22 @@ def get_inline_keyboard():
     )
     return markup
 
-# ---------- /start ----------
+# ========= /start =========
 @bot.message_handler(commands=['start'])
 def start(message):
     print("▶ /start от", message.chat.id)
+
     bot.send_message(
         message.chat.id,
-        "Привет! 👋\n\nНажмите кнопку ниже, чтобы оставить заявку 👇",
+        "Привет! 👋\n\n"
+        "Нажмите кнопку ниже, чтобы оставить заявку 👇",
         reply_markup=get_inline_keyboard()
     )
 
-# ---------- ЗАЯВКА ----------
+# ========= ПРИЕМ ЗАЯВКИ =========
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app(message):
-    print("🔥 web_app_data ПОЛУЧЕН")
+    print("🔥 Получены web_app_data")
 
     try:
         raw = message.web_app_data.data
@@ -52,14 +61,14 @@ def handle_web_app(message):
             f"💬 Комментарий: {comment}"
         )
 
-        # Отправка в канал
+        # 👉 В КАНАЛ
         bot.send_message(CHANNEL_ID, text)
 
-        # Ответ пользователю
+        # 👉 Пользователю
         bot.send_message(
             message.chat.id,
             "✅ Спасибо за заявку!\n\n"
-            "Мы скоро с вами свяжемся 😊\n\n"
+            "Мы скоро свяжемся с вами 😊\n\n"
             "Можно оставить ещё одну заявку 👇",
             reply_markup=get_inline_keyboard()
         )
@@ -70,13 +79,11 @@ def handle_web_app(message):
         print("❌ ОШИБКА:", e)
         bot.send_message(message.chat.id, "Ошибка при обработке заявки 😢")
 
-# ---------- FALLBACK ----------
+# ========= FALLBACK =========
 @bot.message_handler(func=lambda m: True)
 def fallback(message):
-    print("ℹ️ Сообщение:", message.text)
+    print("ℹ️ Обычное сообщение:", message.text)
 
+# ========= ЗАПУСК =========
 print("🤖 Бот запущен")
 bot.infinity_polling(timeout=20, long_polling_timeout=20)
-
-
-
