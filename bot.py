@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 import json
 
-TOKEN = "8438570344:AAGfzqB9GJ2j7Ix-N4Pcs6DAjcxotH91p1U"
+TOKEN = os.getenv("BOT_TOKEN")
 
 CHANNEL_ID = "@INTERIOR_DESIGN_KRASNODAR"
 WEBAPP_URL = "https://karlitomasterini-dotcom.github.io/interior-mini-app/"
@@ -77,5 +77,6 @@ def fallback(message):
 
 print("🤖 Бот запущен")
 bot.infinity_polling(timeout=20, long_polling_timeout=20)
+
 
 
