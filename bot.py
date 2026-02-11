@@ -2,8 +2,8 @@ import telebot
 from telebot import types
 import json
 import os
+import time
 
-# ===== TOKEN =====
 TOKEN = os.getenv("BOT_TOKEN")
 
 CHANNEL_ID = "@INTERIOR_DESIGN_KRASNODAR"
@@ -26,26 +26,21 @@ def get_inline_keyboard():
 @bot.message_handler(commands=['start'])
 def start(message):
     print("▶ /start от", message.chat.id)
-
     bot.send_message(
         message.chat.id,
         "Привет! 👋\n\nНажмите кнопку ниже, чтобы оставить заявку 👇",
         reply_markup=get_inline_keyboard()
     )
 
-# ---------- DEBUG WEBAPP ----------
+# ---------- WEBAPP ----------
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app(message):
-    print("🔥 web_app_data ПРИШЁЛ")
+    print("🔥 web_app_data ПОЛУЧЕН")
 
     try:
         raw = message.web_app_data.data
-        print("RAW DATA:", raw)
+        print("RAW:", raw)
 
-        # DEBUG — отправим тебе в чат
-        bot.send_message(message.chat.id, f"DEBUG:\n{raw}")
-
-        # Разбор JSON
         data = json.loads(raw)
 
         name = data.get("name", "Не указано")
@@ -59,23 +54,23 @@ def handle_web_app(message):
             f"💬 Комментарий: {comment}"
         )
 
-        # Отправка в канал
+        # отправляем себе
+        bot.send_message(message.chat.id, text)
+
+        # отправляем в канал
         bot.send_message(CHANNEL_ID, text)
 
-        print("✅ Заявка отправлена в канал")
+        print("✅ Заявка отправлена")
 
     except Exception as e:
-        print("❌ ERROR:", e)
-        bot.send_message(message.chat.id, "Ошибка обработки 😢")
+        print("❌ ОШИБКА:", e)
 
-# ---------- FALLBACK ----------
-@bot.message_handler(func=lambda m: True)
-def fallback(message):
-    print("ℹ️ Сообщение:", message.text)
-
+# ---------- ЗАПУСК С ПЕРЕЗАПУСКОМ ----------
 print("🤖 Бот запущен")
 
-bot.infinity_polling(timeout=20, long_polling_timeout=20)
-
-
-
+while True:
+    try:
+        bot.infinity_polling(timeout=20, long_polling_timeout=20)
+    except Exception as e:
+        print("❌ Polling error:", e)
+        time.sleep(5)
