@@ -3,6 +3,7 @@ from telebot import types
 import json
 import os
 
+# ===== TOKEN =====
 TOKEN = os.getenv("BOT_TOKEN")
 
 CHANNEL_ID = "@INTERIOR_DESIGN_KRASNODAR"
@@ -10,6 +11,7 @@ WEBAPP_URL = "https://karlitomasterini-dotcom.github.io/interior-mini-app/"
 
 bot = telebot.TeleBot(TOKEN)
 
+# ---------- КНОПКА ----------
 def get_inline_keyboard():
     markup = types.InlineKeyboardMarkup()
     markup.add(
@@ -20,49 +22,60 @@ def get_inline_keyboard():
     )
     return markup
 
+# ---------- /start ----------
 @bot.message_handler(commands=['start'])
 def start(message):
     print("▶ /start от", message.chat.id)
+
     bot.send_message(
         message.chat.id,
-        "Привет! 👋\n\nНажмите кнопку ниже 👇",
+        "Привет! 👋\n\nНажмите кнопку ниже, чтобы оставить заявку 👇",
         reply_markup=get_inline_keyboard()
     )
 
+# ---------- DEBUG WEBAPP ----------
 @bot.message_handler(content_types=['web_app_data'])
 def handle_web_app(message):
-    print("🔥 web_app_data ПОЛУЧЕН")
+    print("🔥 web_app_data ПРИШЁЛ")
 
     try:
         raw = message.web_app_data.data
-        print("RAW:", raw)
+        print("RAW DATA:", raw)
 
+        # DEBUG — отправим тебе в чат
+        bot.send_message(message.chat.id, f"DEBUG:\n{raw}")
+
+        # Разбор JSON
         data = json.loads(raw)
 
         name = data.get("name", "Не указано")
         phone = data.get("phone", "Не указан")
         comment = data.get("comment", "—")
 
-        text = f"""
-📩 Новая заявка
-
-👤 Имя: {name}
-📞 Телефон: {phone}
-💬 Комментарий: {comment}
-"""
-
-        bot.send_message(message.chat.id, text)
-
-        bot.send_message(
-            message.chat.id,
-            "✅ Спасибо! Заявка отправлена 😊",
-            reply_markup=get_inline_keyboard()
+        text = (
+            "📩 Новая заявка\n\n"
+            f"👤 Имя: {name}\n"
+            f"📞 Телефон: {phone}\n"
+            f"💬 Комментарий: {comment}"
         )
 
+        # Отправка в канал
+        bot.send_message(CHANNEL_ID, text)
+
+        print("✅ Заявка отправлена в канал")
+
     except Exception as e:
-        print("❌ ОШИБКА:", e)
+        print("❌ ERROR:", e)
+        bot.send_message(message.chat.id, "Ошибка обработки 😢")
+
+# ---------- FALLBACK ----------
+@bot.message_handler(func=lambda m: True)
+def fallback(message):
+    print("ℹ️ Сообщение:", message.text)
 
 print("🤖 Бот запущен")
-bot.infinity_polling()
+
+bot.infinity_polling(timeout=20, long_polling_timeout=20)
+
 
 
